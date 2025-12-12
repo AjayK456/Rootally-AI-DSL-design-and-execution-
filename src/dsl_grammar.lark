@@ -1,0 +1,36 @@
+start: script
+
+script: entry_block exit_block?
+
+entry_block: "ENTRY:" expr
+exit_block: "EXIT:" expr
+
+?expr: expr AND expr      -> and_op
+     | expr OR expr       -> or_op
+     | comparison
+     | cross
+     | value
+
+comparison: value COMP value
+cross: value CROSS_OP value
+
+?value: FIELD
+      | NUMBER
+      | function_call
+
+function_call: NAME "(" [value ("," value)*] ")"
+
+FIELD: /(open|high|low|close|volume)/i
+NAME: /(sma|ema|rsi)/i
+
+NUMBER: /[0-9]+(\.[0-9]+)?/
+
+CROSS_OP: /(crosses_above|crosses_below)/i
+
+AND: /and/i
+OR: /or/i
+
+COMP: ">" | "<" | ">=" | "<=" | "==" | "!="
+
+%import common.WS
+%ignore WS
