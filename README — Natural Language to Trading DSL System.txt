@@ -1,0 +1,269 @@
+﻿README — Natural Language to Trading DSL System
+1. Title
+Natural Language ↠ DSL ↠ AST ↠ Trading Signal & Backtest Engine
+________________
+
+
+2. Overview
+This project converts human-written trading rules into a formal Domain-Specific Language (DSL), parses them into an Abstract Syntax Tree (AST), generates actionable trading signals, and performs a simple long-only backtest using the developed pipeline.
+Example:
+Natural language:
+Buy when price closes above the 20-day moving average and volume is above 1M.
+DSL:
+ENTRY:
+close > sma(close,20) AND volume > 1000000
+
+
+The system then:
+1. Parses the DSL
+
+2. Builds an AST
+
+3. Generates entry/exit signals
+
+4. Runs a backtest over sample market data
+
+All components are fully modular.
+________________
+
+
+3. System Components
+A) nlp_to_dsl.py
+   * Converts human language into structured DSL.
+
+   * Normalizes common trading terms: SMA, RSI, volume units, comparisons.
+
+B) dsl_grammar.lark
+      * Defines the formal grammar used by the parser.
+
+      * Ensures DSL is unambiguous and machine-readable.
+
+C) parser.py
+         * Loads grammar using Lark.
+
+         * Converts DSL text into an AST composed of Python objects.
+
+D) ast_nodes.py
+            * Contains node classes:
+FieldNode, NumberNode, FunctionNode, CompareNode, BooleanNode, CrossNode, ScriptAST.
+
+E) codegen.py
+               * Evaluates AST against a pandas DataFrame.
+
+               * Produces boolean Series for entry and exit signals.
+
+F) backtest.py
+                  * Implements a simple long-only simulator:
+
+                     * Enter on first entry signal
+
+                     * Exit on first exit signal
+
+                     * Compute total return, drawdown, and trade log
+
+G) end_to_end.py
+                        * Interactive demo runner.
+
+                        * Shows full pipeline from input → DSL → AST → signals → backtest.
+
+________________
+
+
+4. How the Pipeline Works
+Step 1 — NL → DSL
+User input:
+Buy when price is above 50
+
+
+Becomes:
+ENTRY:
+close > 50
+
+
+Step 2 — DSL → AST
+The grammar parses expressions like:
+close > sma(close,20) AND volume > 1000000
+
+
+Into a structured AST:
+BoolNode(
+  op='AND',
+  left=CompareNode(...),
+  right=CompareNode(...)
+)
+
+
+Step 3 — AST → Signals
+Using market data (open, high, low, close, volume), the system produces:
+entry exit
+False False
+True  False
+True  False
+...
+
+
+Step 4 — Backtest
+A simple long-only performance simulation outputs:
+                           * Total Return
+
+                           * Max Drawdown
+
+                           * Number of Trades
+
+                           * Trade Log
+
+________________
+
+
+5. Requirements
+Python Version
+Python 3.10 or above
+Required Libraries
+lark-parser
+pandas
+numpy
+________________
+
+
+6. How to Run the Demo
+From project root:
+python end_to_end.py
+
+
+You will be prompted:
+Enter natural language rule:
+>
+
+
+Example valid input:
+Buy when price closes above 20-day moving average and volume is above 1M. Exit when RSI(14) goes below 40.
+
+
+________________
+
+
+7. How to Run Tests
+If test folder is included:
+Run all tests:
+pytest
+
+
+Run individual tests:
+pytest tests/test_parser.py
+pytest tests/test_nlp2dsl.py
+pytest tests/test_codegen.py
+pytest tests/test_backtest.py
+
+
+________________
+
+
+8. Accepted Input Formats (Correct Forms)
+✔ Correct Examples
+Buy when price is above 100
+Buy when price is above 20-day SMA
+Buy when price closes above the 20-day moving average and volume is above 1M
+Buy when price is above 50-day moving average
+
+
+✔ Supported Units
+1M   → 1000000
+500k → 500000
+
+
+✔ Supported indicators
+sma(close,20)
+ema(close,10)
+rsi(close,14)
+
+
+✔ Supported operators
+>, <, >=, <=, ==, !=
+AND, OR
+CROSSES_ABOVE, CROSSES_BELOW
+
+
+________________
+
+
+9. Wrong / Unsupported Input Formats
+❌ Missing fields
+Buy when above 50
+Exit when lower than 30
+
+
+❌ Natural-language comparisons the system cannot normalize
+Buy if the market seems strong
+Sell when it looks weak
+
+
+❌ Multi-sentence ambiguous instructions
+Buy whenever it feels right. Exit when appropriate.
+
+
+❌ Unsupported synonyms
+price skyrockets above 100
+
+
+❌ Typos
+SMA(20day)
+RS 14
+cloose > 50
+
+
+________________
+
+
+10. Important Notes
+                              * Natural language rules must contain clear numeric comparisons.
+
+                              * NLP → DSL conversion is rule-based, not AI-based, so it expects familiar trading phrasing.
+
+                              * DSL must match the formal grammar exactly.
+
+                              * Backtest engine is simple long-only, not a full trading simulator.
+
+________________
+
+
+11. Example Complete Run
+Input:
+Buy when price is above 50. Exit when price falls below 45.
+
+
+Output DSL:
+ENTRY:
+close > 50
+
+
+EXIT:
+close < 45
+
+
+AST:
+ScriptAST(entry=CompareNode(...), exit=CompareNode(...))
+
+
+Signals:
+entry exit
+True  False
+True  False
+False True
+
+
+Backtest:
+Total Return: 5.67%
+Max Drawdown: 0.00%
+Trades: 1
+
+
+12. Use cases
+                                 1. Lets analysts write trading rules in plain English and instantly convert them into executable strategy code.
+
+                                 2. Enables rapid prototyping and backtesting of trading ideas without manual coding.
+
+                                 3. Helps traders validate indicator-based strategies (SMA, RSI, volume rules) quickly and consistently.
+
+                                 4. Allows managers to give verbal/typed instructions that automatically translate into logic the system can execute.
+
+                                 5. Useful for building chat-based or automated trading assistants that understand natural-language trading rules.
