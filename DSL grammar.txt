@@ -100,7 +100,7 @@ Function_call
 Allowed predefined fields:
          * FIELD: open | high | low | close | volume
 All case-insensitive.
-________________
+
 
 
 4.2 Numbers
@@ -137,7 +137,7 @@ ________________
 
 
 5. Complete DSL Examples
-________________
+
 
 
 Example 1 — Simple Entry Rule
@@ -222,5 +222,6 @@ ________________
             * Expressions must be valid combinations defined in grammar.
 
             * EXIT block optional, but ENTRY block mandatory.
+
 
 ________________
