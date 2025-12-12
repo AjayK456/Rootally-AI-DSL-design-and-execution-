@@ -1,0 +1,226 @@
+﻿1. DSL Grammar Overview:
+The DSL represents trading rules as two optional blocks:
+ENTRY:
+<expression>
+
+
+EXIT:
+<expression>
+
+
+* ENTRY block describes when to enter a long position.
+
+* EXIT block describes when to close the position.
+
+* The EXIT block is optional, but the ENTRY block is mandatory according to the grammar.
+
+Expressions support comparisons, logical combinations, indicator functions, and crossover detection.
+________________
+
+
+2. Grammar Structure
+2.1 Script
+start: script
+
+
+script: entry_block exit_block?
+2.2 Blocks
+entry_block: "ENTRY:" expr
+exit_block:  "EXIT:" expr
+
+
+________________
+
+
+3. Expressions
+3.1 Logical Operators
+   * AND: "and"
+   * OR:  "or"
+
+Example:
+close > sma(close,20) and volume > 1000000
+rsi(close) < 30 or close < ema(close,200)
+
+
+________________
+
+
+3.2 Comparisons
+comparison: value COMP value
+-------------------------------
+| Operator | Meaning          |
+| -------- | ---------------- |
+| >        | greater than     |
+| <        | less than        |
+| >=       | greater or equal |
+| <=       | less or equal    |
+| ==       | equal            |
+| !=       | not equal        |
+—------------------------------
+
+
+
+
+Example:
+close > sma(close,20)
+
+
+
+
+
+
+________________
+
+
+3.3 Crossovers
+cross: value CROSS_OP value
+
+
+Supported crossover types:
+      * crosses_above
+
+      * crosses_below
+Example:
+close crosses_above sma(close,50)
+
+
+________________
+
+
+4. Values
+A value in the DSL may be:
+FIELD
+NUMBER
+Function_call
+
+
+
+
+4.1 Fields
+Allowed predefined fields:
+         * FIELD: open | high | low | close | volume
+All case-insensitive.
+________________
+
+
+4.2 Numbers
+NUMBER: integers or decimals
+
+
+Examples:
+100
+20.5
+50.0
+
+
+________________
+
+
+4.3 Functions
+function_call: NAME "(" args ")"
+
+
+Supported functions:
+         * sma
+
+         * ema
+
+         * rsi
+
+Each accepts parameters like:
+sma(close,20)
+ema(close,50)
+rsi(close)
+
+
+________________
+
+
+5. Complete DSL Examples
+________________
+
+
+Example 1 — Simple Entry Rule
+ENTRY:
+close > sma(close,20)
+
+
+EXIT:
+0
+
+
+________________
+
+
+Example 2 — Entry with Logical Operators
+ENTRY:
+close > sma(close,20) and volume > 1000000
+
+
+EXIT:
+0
+
+
+________________
+
+
+Example 3 — Entry and Exit Together
+ENTRY:
+rsi(close) < 30
+
+
+EXIT:
+rsi(close) > 70
+
+
+________________
+
+
+Example 4 — Crossover Strategy
+ENTRY:
+ema(close,20) crosses_above ema(close,50)
+
+
+EXIT:
+ema(close,20) crosses_below ema(close,50)
+
+
+________________
+
+
+Example 5 — Sell-only Strategy (Valid DSL Form)
+Because the grammar requires ENTRY: first:
+ENTRY:
+0
+
+
+EXIT:
+close > 100
+________________
+
+
+
+
+
+
+6. Whitespace Handling
+The DSL ignores whitespace using:
+%ignore WS
+
+
+Spacing and newlines do not matter.
+________________
+
+
+7. Notes & Constraints
+            * ENTRY block must appear first (parser requirement).
+
+            * Case-insensitive keywords (and, or, function names, fields).
+
+            * No shorting; DSL is long-only.
+
+            * Expressions must be valid combinations defined in grammar.
+
+            * EXIT block optional, but ENTRY block mandatory.
+
+________________
