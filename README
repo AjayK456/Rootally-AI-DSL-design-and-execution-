@@ -164,6 +164,9 @@ Buy when price is above 100
 Buy when price is above 20-day SMA
 Buy when price closes above the 20-day moving average and volume is above 1M
 Buy when price is above 50-day moving average
+Exit when RSI(14) goes below 40
+Exit when price is below 100
+Buy when RSI(14) is above 60
 
 
 ✔ Supported Units
@@ -267,3 +270,4 @@ Trades: 1
                                  4. Allows managers to give verbal/typed instructions that automatically translate into logic the system can execute.
 
                                  5. Useful for building chat-based or automated trading assistants that understand natural-language trading rules.
+
